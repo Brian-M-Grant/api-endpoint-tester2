@@ -33,6 +33,17 @@
   </div>
 
   <script>
+    async function fetchCollection(collectionId, apiKey) {
+      const response = await fetch(`https://api.getpostman.com/collections/${collectionId}`, {
+        headers: {
+          'X-Api-Key': apiKey
+        }
+      });
+
+      const collectionData = await response.json();
+      return collectionData.collection;
+    }
+
     async function testEndpoint(endpoint) {
       const { name, url, method } = endpoint;
 
@@ -68,19 +79,20 @@
       resultRow.appendChild(dataTypeCell);
 
       const securityCell = document.createElement('td');
-      securityCell.textContent = response.headers.get('Your-Security-Header-Field'); // Replace with the correct security header field
+      const securityStatus = response.url.startsWith('https') ? 'Secure' : 'Not Secure';
+      securityCell.textContent = securityStatus;
       resultRow.appendChild(securityCell);
 
       document.querySelector('#results table').appendChild(resultRow);
     }
 
     async function runTests() {
-      // Fetch the data from Postman collection JSON file
-      const response = await fetch('postman_collection.json');
-      const postmanData = await response.json();
+      const collectionId = 'YOUR_COLLECTION_ID'; // Replace with your Postman collection ID
+      const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
 
-      // Extract endpoints from Postman data
-      const endpoints = postmanData.item.map(item => {
+      const collection = await fetchCollection(collectionId, apiKey);
+
+      const endpoints = collection.item.map(item => {
         const name = item.name;
         const url = item.request.url.raw;
         const method = item.request.method;
