@@ -28,23 +28,12 @@
         <th>Speed (ms)</th>
         <th>Data Type</th>
         <th>Security</th>
+        <th>Data</th>
       </tr>
     </table>
   </div>
 
   <script>
-    async function fetchWorkspaceCollections(workspaceId, apiKey) {
-  const response = await fetch(`https://api.getpostman.com/workspaces/${workspaceId}/collections`, {
-    headers: {
-      'X-Api-Key': apiKey
-    }
-  });
-
-  const workspaceData = await response.json();
-  return workspaceData.collections || [];
-}
-
-
     async function fetchCollectionEndpoints(collectionId, apiKey) {
       const response = await fetch(`https://api.getpostman.com/collections/${collectionId}`, {
         headers: {
@@ -96,31 +85,29 @@
       securityCell.textContent = securityStatus;
       resultRow.appendChild(securityCell);
 
+      const dataCell = document.createElement('td');
+      dataCell.textContent = JSON.stringify(data);
+      resultRow.appendChild(dataCell);
+
       document.querySelector('#results table').appendChild(resultRow);
     }
-async function runTests() {
-  const workspaceId = 'YOUR_WORKSPACE_ID'; // Replace with your Postman workspace ID
-  const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
 
-  const collections = await fetchWorkspaceCollections(workspaceId, apiKey);
+    async function runTests() {
+      const collectionId = 'YOUR_COLLECTION_ID'; // Replace with your Postman collection ID
+      const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
 
-  for (let i = 0; i < collections.length; i++) {
-    const collection = collections[i];
-    const endpoints = await fetchCollectionEndpoints(collection.uid, apiKey);
+      const endpoints = await fetchCollectionEndpoints(collectionId, apiKey);
 
-    for (const endpoint of endpoints) {
-      try {
-        await testEndpoint(endpoint);
-      } catch (error) {
-        console.error(`Error testing ${endpoint.name}: ${error}`);
+      for (const endpoint of endpoints) {
+        try {
+          await testEndpoint(endpoint);
+        } catch (error) {
+          console.error(`Error testing ${endpoint.name}: ${error}`);
+        }
       }
     }
-  }
-}
 
-runTests();
-
-
+    runTests();
   </script>
 </body>
 </html>
