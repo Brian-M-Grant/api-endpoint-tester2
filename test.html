@@ -1,107 +1,103 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>API Endpoint Test</title>
-    <style>
-        #results {
-            margin-top: 10px;
-        }
+  <title>API Endpoint Test</title>
+  <style>
+    #results {
+      margin-top: 10px;
+    }
 
-        #results table {
-            border-collapse: collapse;
-        }
+    #results table {
+      border-collapse: collapse;
+    }
 
-        #results table,
-        #results th,
-        #results td {
-            border: 1px solid black;
-            padding: 5px;
-        }
-    </style>
+    #results table, #results th, #results td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>API Endpoint Test</h1>
+  <h1>API Endpoint Test</h1>
 
-    <div id="results">
-        <table>
-            <tr>
-                <th>Endpoint</th>
-                <th>Method</th>
-                <th>Speed (ms)</th>
-                <th>Data Type</th>
-                <th>Security</th>
-            </tr>
-        </table>
-    </div>
+  <div id="results">
+    <table>
+      <tr>
+        <th>Endpoint</th>
+        <th>Method</th>
+        <th>Speed (ms)</th>
+        <th>Data Type</th>
+        <th>Security</th>
+      </tr>
+    </table>
+  </div>
 
-    <script>
-        async function testEndpoint(endpoint) {
-            const { name, url, method } = endpoint;
+  <script>
+    async function testEndpoint(endpoint) {
+      const { name, url, method } = endpoint;
 
-            const options = {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key: 'value' }) // Modify the body as needed
-            };
+      const options = {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'value' }) // Modify the body as needed
+      };
 
-            const response = await fetch(url, options);
-            const data = await response.json();
+      const startTime = performance.now();
+      const response = await fetch(url, options);
+      const endTime = performance.now();
+      const speed = endTime - startTime;
 
-            const resultRow = document.createElement('tr');
+      const data = await response.json();
 
-            const endpointCell = document.createElement('td');
-            endpointCell.textContent = name;
-            resultRow.appendChild(endpointCell);
+      const resultRow = document.createElement('tr');
 
-            const methodCell = document.createElement('td');
-            methodCell.textContent = method;
-            resultRow.appendChild(methodCell);
+      const endpointCell = document.createElement('td');
+      endpointCell.textContent = name;
+      resultRow.appendChild(endpointCell);
 
-            const speedCell = document.createElement('td');
-            speedCell.textContent = response.headers.get('X-Response-Time');
-            resultRow.appendChild(speedCell);
+      const methodCell = document.createElement('td');
+      methodCell.textContent = method;
+      resultRow.appendChild(methodCell);
 
-            const dataTypeCell = document.createElement('td');
-            dataTypeCell.textContent = typeof data;
-            resultRow.appendChild(dataTypeCell);
+      const speedCell = document.createElement('td');
+      speedCell.textContent = speed.toFixed(2); // Display speed with two decimal places
+      resultRow.appendChild(speedCell);
 
-            const securityCell = document.createElement('td');
-            securityCell.textContent = response.headers.get('X-Content-Security-Policy');
-            resultRow.appendChild(securityCell);
+      const dataTypeCell = document.createElement('td');
+      dataTypeCell.textContent = typeof data;
+      resultRow.appendChild(dataTypeCell);
 
-            document.querySelector('#results table').appendChild(resultRow);
+      const securityCell = document.createElement('td');
+      securityCell.textContent = response.headers.get('Your-Security-Header-Field'); // Replace with the correct security header field
+      resultRow.appendChild(securityCell);
+
+      document.querySelector('#results table').appendChild(resultRow);
+    }
+
+    async function runTests() {
+      // Fetch the data from Postman collection JSON file
+      const response = await fetch('postman_collection.json');
+      const postmanData = await response.json();
+
+      // Extract endpoints from Postman data
+      const endpoints = postmanData.item.map(item => {
+        const name = item.name;
+        const url = item.request.url.raw;
+        const method = item.request.method;
+
+        return { name, url, method };
+      });
+
+      for (const endpoint of endpoints) {
+        try {
+          await testEndpoint(endpoint);
+        } catch (error) {
+          console.error(`Error testing ${endpoint.name}: ${error}`);
         }
+      }
+    }
 
-        async function runTests() {
-            // Fetch the data from Postman collection JSON file
-            const response = await fetch('postman_collection.json');
-            const postmanData = await response.json();
-
-            // Extract endpoints from Postman data
-            const endpoints = postmanData.item.map(item => {
-                const name = item.name;
-                const url = item.request.url.raw;
-                const method = item.request.method;
-
-                return { name, url, method };
-            });
-
-            for (const endpoint of endpoints)
-            {
-                try
-                {
-                    await testEndpoint(endpoint);
-                } catch (error)
-                {
-                    console.error(`Error testing ${endpoint.name}: ${error}`);
-                }
-            }
-        }
-
-        runTests();
-    </script>
+    runTests();
+  </script>
 </body>
-
 </html>
