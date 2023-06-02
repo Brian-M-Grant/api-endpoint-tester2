@@ -34,15 +34,16 @@
 
   <script>
     async function fetchWorkspaceCollections(workspaceId, apiKey) {
-      const response = await fetch(`https://api.getpostman.com/workspaces/${workspaceId}/collections`, {
-        headers: {
-          'X-Api-Key': apiKey
-        }
-      });
-
-      const collectionsData = await response.json();
-      return collectionsData.collections;
+  const response = await fetch(`https://api.getpostman.com/workspaces/${workspaceId}/collections`, {
+    headers: {
+      'X-Api-Key': apiKey
     }
+  });
+
+  const workspaceData = await response.json();
+  return workspaceData.collections || [];
+}
+
 
     async function fetchCollectionEndpoints(collectionId, apiKey) {
       const response = await fetch(`https://api.getpostman.com/collections/${collectionId}`, {
