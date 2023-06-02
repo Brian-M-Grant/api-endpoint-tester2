@@ -1,115 +1,139 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>API Endpoint Test</title>
-  <style>
-    #results {
-      margin-top: 10px;
-    }
-
-    #results table {
-      border-collapse: collapse;
-    }
-
-    #results table, #results th, #results td {
-      border: 1px solid black;
-      padding: 5px;
-    }
-  </style>
+    <title>API Endpoint Test</title>
+    <style>
+        h1 {
+            text-align: center;
+            text-decoration: dotted;
+        }
+    
+        * {
+            background-color: rgb(180, 179, 179);
+            color: black;
+        }
+    
+        #results {
+            margin: auto auto;
+            width: 100%;
+    
+        }
+    
+        #results table {
+            border-collapse: collapse;
+            width: 100%;
+    
+        }
+    
+        #results table,
+        #results th,
+        #results td {
+            border: 1px solid black;
+            width: 100%;
+            padding: 3em;
+            margin: auto auto
+        }
+    </style>
 </head>
+
 <body>
-  <h1>API Endpoint Test</h1>
+    <h1>API Endpoint Test</h1>
 
-  <div id="results">
-    <table>
-      <tr>
-        <th>Endpoint</th>
-        <th>Method</th>
-        <th>Speed (ms)</th>
-        <th>Data Type</th>
-        <th>Security</th>
-      </tr>
-    </table>
-  </div>
+    <div id="results">
+        <table>
+            <tr>
+                <th>Endpoint</th>
+                <th>Method</th>
+                <th>Speed (ms)</th>
+                <th>Data Type</th>
+                <th>Security</th>
+            </tr>
+        </table>
+    </div>
 
-  <script>
-    async function fetchCollection(collectionId, apiKey) {
-      const response = await fetch(`https://api.getpostman.com/collections/${collectionId}`, {
-        headers: {
-          'X-Api-Key': apiKey
+    <script>
+        async function fetchCollection(collectionId, apiKey) {
+            const response = await fetch(`https://api.getpostman.com/collections/${collectionId}`, {
+                headers: {
+                    'X-Api-Key': apiKey
+                }
+            });
+
+            const collectionData = await response.json();
+            return collectionData.collection;
         }
-      });
 
-      const collectionData = await response.json();
-      return collectionData.collection;
-    }
+        async function testEndpoint(endpoint) {
+            const { name, url, method } = endpoint;
 
-    async function testEndpoint(endpoint) {
-      const { name, url, method } = endpoint;
+            const options = {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'value' }) // Modify the body as needed
+            };
 
-      const options = {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'value' }) // Modify the body as needed
-      };
+            const startTime = performance.now();
+            const response = await fetch(url, options);
+            const endTime = performance.now();
+            const speed = endTime - startTime;
 
-      const startTime = performance.now();
-      const response = await fetch(url, options);
-      const endTime = performance.now();
-      const speed = endTime - startTime;
+            const data = await response.json();
 
-      const data = await response.json();
+            const resultRow = document.createElement('tr');
 
-      const resultRow = document.createElement('tr');
+            const endpointCell = document.createElement('td');
+            endpointCell.textContent = name;
+            resultRow.appendChild(endpointCell);
 
-      const endpointCell = document.createElement('td');
-      endpointCell.textContent = name;
-      resultRow.appendChild(endpointCell);
+            const methodCell = document.createElement('td');
+            methodCell.textContent = method;
+            resultRow.appendChild(methodCell);
 
-      const methodCell = document.createElement('td');
-      methodCell.textContent = method;
-      resultRow.appendChild(methodCell);
+            const speedCell = document.createElement('td');
+            speedCell.textContent = speed.toFixed(2); // Display speed with two decimal places
+            resultRow.appendChild(speedCell);
 
-      const speedCell = document.createElement('td');
-      speedCell.textContent = speed.toFixed(2); // Display speed with two decimal places
-      resultRow.appendChild(speedCell);
+            const dataTypeCell = document.createElement('td');
+            dataTypeCell.textContent = typeof data;
+            resultRow.appendChild(dataTypeCell);
 
-      const dataTypeCell = document.createElement('td');
-      dataTypeCell.textContent = typeof data;
-      resultRow.appendChild(dataTypeCell);
+            const securityCell = document.createElement('td');
+            const securityStatus = response.url.startsWith('https') ? 'Secure' : 'Not Secure';
+            securityCell.textContent = securityStatus;
+            resultRow.appendChild(securityCell);
 
-      const securityCell = document.createElement('td');
-      const securityStatus = response.url.startsWith('https') ? 'Secure' : 'Not Secure';
-      securityCell.textContent = securityStatus;
-      resultRow.appendChild(securityCell);
-
-      document.querySelector('#results table').appendChild(resultRow);
-    }
-
-    async function runTests() {
-      const collectionId = 'YOUR_COLLECTION_ID'; // Replace with your Postman collection ID
-      const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
-
-      const collection = await fetchCollection(collectionId, apiKey);
-
-      const endpoints = collection.item.map(item => {
-        const name = item.name;
-        const url = item.request.url.raw;
-        const method = item.request.method;
-
-        return { name, url, method };
-      });
-
-      for (const endpoint of endpoints) {
-        try {
-          await testEndpoint(endpoint);
-        } catch (error) {
-          console.error(`Error testing ${endpoint.name}: ${error}`);
+            document.querySelector('#results table').appendChild(resultRow);
         }
-      }
-    }
 
-    runTests();
-  </script>
+        async function runTests() {
+            const collectionId = 'YOUR_COLLECTION_ID'; // Replace with your Postman collection ID
+            const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
+
+            const collection = await fetchCollection(collectionId, apiKey);
+
+            const endpoints = collection.item.map(item => {
+                const name = item.name;
+                const url = item.request.url.raw;
+                const method = item.request.method;
+
+                return { name, url, method };
+            });
+
+            for (const endpoint of endpoints)
+            {
+                try
+                {
+                    await testEndpoint(endpoint);
+                } catch (error)
+                {
+                    console.error(`Error testing ${endpoint.name}: ${error}`);
+                }
+            }
+        }
+
+        runTests();
+    </script>
 </body>
+
 </html>
