@@ -99,25 +99,27 @@
     }
 
     async function runTests() {
-      const workspaceId = 'YOUR_WORKSPACE_ID'; // Replace with your Postman workspace ID
-      const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
+  const workspaceId = 'YOUR_WORKSPACE_ID'; // Replace with your Postman workspace ID
+  const apiKey = 'YOUR_API_KEY'; // Replace with your Postman API key
 
-      const collections = await fetchWorkspaceCollections(workspaceId, apiKey);
+  const collections = await fetchWorkspaceCollections(workspaceId, apiKey);
 
-      for (const collection of collections) {
-        const endpoints = await fetchCollectionEndpoints(collection.uid, apiKey);
+  for (let i = 0; i < collections.length; i++) {
+    const collection = collections[i];
+    const endpoints = await fetchCollectionEndpoints(collection.uid, apiKey);
 
-        for (const endpoint of endpoints) {
-          try {
-            await testEndpoint(endpoint);
-          } catch (error) {
-            console.error(`Error testing ${endpoint.name}: ${error}`);
-          }
-        }
+    for (const endpoint of endpoints) {
+      try {
+        await testEndpoint(endpoint);
+      } catch (error) {
+        console.error(`Error testing ${endpoint.name}: ${error}`);
       }
     }
+  }
+}
 
-    runTests();
+runTests();
+
   </script>
 </body>
 </html>
